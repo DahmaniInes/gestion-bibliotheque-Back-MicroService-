@@ -1,13 +1,13 @@
-package com.noussa.event;
+package tn.esprit.ecommerce;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class EventApplication {
+public class ECommerceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(EventApplication.class, args);
+		SpringApplication.run(ECommerceApplication.class, args);
 	}
 
 }
