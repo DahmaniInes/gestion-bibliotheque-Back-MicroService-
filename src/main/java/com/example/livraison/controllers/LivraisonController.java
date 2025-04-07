@@ -3,6 +3,7 @@ package com.example.livraison.controllers;
 
 import com.example.livraison.entities.Livraison;
 import com.example.livraison.services.ILivraisonService;
+import com.example.livraison.services.LivraisonServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +12,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/livraisons")
+@RequestMapping("/livraisons")
 public class LivraisonController {
-
+@Autowired
     private final ILivraisonService livraisonService;
+    @PostMapping("/from-commande/{commandeId}")
+    public Livraison creerDepuisCommande(@PathVariable Long commandeId) {
+        return livraisonService.creerLivraisonDepuisCommande(commandeId);
+    }
 
     @Autowired
     public LivraisonController(ILivraisonService livraisonService) {

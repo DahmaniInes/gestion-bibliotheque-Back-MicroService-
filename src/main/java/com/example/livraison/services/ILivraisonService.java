@@ -8,6 +8,7 @@ import java.util.Optional;
 public interface ILivraisonService {
 
     List<Livraison> getAllLivraisons();
+    Livraison creerLivraisonDepuisCommande(Long commandeId);
 
     Optional<Livraison> getLivraisonById(Long id);
 

@@ -1,6 +1,7 @@
 package com.example.livraison.services;
 
 
+import com.example.livraison.dto.CommandeDTO;
 import com.example.livraison.entities.EtatLivraison;
 import com.example.livraison.entities.Livraison;
 import com.example.livraison.entities.Livreur;
@@ -10,7 +11,8 @@ import com.example.livraison.repositories.LivreurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
-
+import com.example.livraison.feign.CommandeClient;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 @Service
@@ -22,7 +24,24 @@ public class LivraisonServiceImpl implements ILivraisonService {
     LivreurRepository livreurRepository;
     @Autowired
     EtatLivraisonRepository etatLivraisonRepository;
+    @Autowired
 
+    private CommandeClient commandeClient;
+
+    public Livraison creerLivraisonDepuisCommande(Long commandeId) {
+        CommandeDTO commande = commandeClient.getCommandeById(commandeId);
+
+        Livraison livraison = new Livraison();
+        livraison.setCommandeId(commande.getId());
+        livraison.setAdresseLivraison(commande.getAdress());
+        livraison.setTelephoneClient(commande.getPhone());
+        livraison.setPrixTotal(commande.getPrixTotal());
+        livraison.setDateLivraison(new Date());
+
+        // etatLivraison et livreur à définir
+
+        return livraisonRepository.save(livraison);
+    }
     @Autowired
     public LivraisonServiceImpl(LivraisonRepository livraisonRepository) {
         this.livraisonRepository = livraisonRepository;

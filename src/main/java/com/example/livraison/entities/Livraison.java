@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "livraison")
@@ -18,7 +19,17 @@ public class Livraison {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime dateLivraison;
+    private Date dateLivraison;
+    private Long commandeId; // vient de commande.id
+
+    private String adresseLivraison; // vient de commande.adress
+
+    private String telephoneClient; // optionnel - vient de commande.phone
+    private String methodePaiement;
+    private Double prixTotal;
+
+
+
 
     @ManyToOne
     @JoinColumn(name = "livreur_id", nullable = false)
