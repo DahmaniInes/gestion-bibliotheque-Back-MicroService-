@@ -1,6 +1,7 @@
 package com.example.livraison.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,5 +31,6 @@ public class Livreur {
     private String vehicule;
     private Boolean disponible;
     @OneToMany(mappedBy = "livreur")
+    @JsonManagedReference
     private List<Livraison> livraisons;
 }
