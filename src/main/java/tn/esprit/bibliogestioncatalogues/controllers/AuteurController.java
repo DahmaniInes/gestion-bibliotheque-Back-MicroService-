@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Tag(name = "Auteur", description = "Operations related to authors")
 @RestController
-@RequestMapping("/api/auteurs")
+@RequestMapping("/auteurs")
 public class AuteurController {
 
     @Autowired

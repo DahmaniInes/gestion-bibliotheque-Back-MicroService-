@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Tag(name = "Categorie", description = "Operations related to categories")
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/categories")
 public class CategorieController {
 
     @Autowired
