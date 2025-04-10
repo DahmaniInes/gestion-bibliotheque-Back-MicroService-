@@ -16,6 +16,23 @@ public class lignepanier implements Serializable {
     @Column(name = "panier_id")
     private Long panierId;
 
+    @Column(name = "produit_id")
+    private Long produitId;
+
+    private Integer quantite;
+
+    // Default constructor
+    public lignepanier() {
+    }
+
+    // Parameterized constructor
+    public lignepanier(Integer quantite, Long produitId, Long panierId) {
+        this.quantite = quantite;
+        this.produitId = produitId;
+        this.panierId = panierId;
+    }
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -24,20 +41,11 @@ public class lignepanier implements Serializable {
         this.id = id;
     }
 
-    public Integer getQuantite() {
-        return quantite;
+    public Long getPanierId() {
+        return panierId;
     }
 
-    public void setQuantite(Integer quantite) {
-        this.quantite = quantite;
-    }
-
-    public lignepanier() {
-    }
-
-    public lignepanier(Integer quantite, Long produitId, Long panierId) {
-        this.quantite = quantite;
-        this.produitId = produitId;
+    public void setPanierId(Long panierId) {
         this.panierId = panierId;
     }
 
@@ -49,16 +57,11 @@ public class lignepanier implements Serializable {
         this.produitId = produitId;
     }
 
-    public Long getPanierId() {
-        return panierId;
+    public Integer getQuantite() {
+        return quantite;
     }
 
-    public void setPanierId(Long panierId) {
-        this.panierId = panierId;
+    public void setQuantite(Integer quantite) {
+        this.quantite = quantite;
     }
-
-    @Column(name = "produit_id")
-    private Long produitId;
-
-    private Integer quantite;
 }

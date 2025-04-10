@@ -10,22 +10,41 @@ import java.util.Optional;
 
 @Service
 public class lignepanierservice {
+
     @Autowired
-    private lignepanierrepository lignePanierRepository;
+    private lignepanierrepository lignepanierrepository;
 
+    // Create
+    public lignepanier createLignePanier(lignepanier lignepanier) {
+        return lignepanierrepository.save(lignepanier);
+    }
+
+    // Read (Get All)
     public List<lignepanier> getAllLignePaniers() {
-        return lignePanierRepository.findAll();
+        return lignepanierrepository.findAll();
     }
 
+    // Read (Get by ID)
     public Optional<lignepanier> getLignePanierById(Long id) {
-        return lignePanierRepository.findById(id);
+        return lignepanierrepository.findById(id);
     }
 
-    public lignepanier saveLignePanier(lignepanier lp) {
-        return lignePanierRepository.save(lp);
+    // Update
+    public lignepanier updateLignePanier(Long id, lignepanier lignepanierDetails) {
+        lignepanier lignepanier = lignepanierrepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("lignepanier not found with id: " + id));
+
+        lignepanier.setPanierId(lignepanierDetails.getPanierId());
+        lignepanier.setProduitId(lignepanierDetails.getProduitId());
+        lignepanier.setQuantite(lignepanierDetails.getQuantite());
+
+        return lignepanierrepository.save(lignepanier);
     }
 
+    // Delete
     public void deleteLignePanier(Long id) {
-        lignePanierRepository.deleteById(id);
+        lignepanier lignepanier = lignepanierrepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("lignepanier not found with id: " + id));
+        lignepanierrepository.delete(lignepanier);
     }
 }
