@@ -18,6 +18,8 @@ public class commandecontroller {
     private commandeservice commandeservice;
 
     // Create a new commande
+    // Create a new commande
+    // Create a new commande
     @PostMapping
     public ResponseEntity<commande> createCommande(@RequestBody commande commande) {
         commande createdCommande = commandeservice.createCommande(commande);
