@@ -10,22 +10,44 @@ import java.util.Optional;
 
 @Service
 public class commandeservice {
+
     @Autowired
-    private commanderepository commandeRepository;
+    private commanderepository commanderepository;
 
+    // Create
+    public commande createCommande(commande commande) {
+        return commanderepository.save(commande);
+    }
+
+    // Read (Get All)
     public List<commande> getAllCommandes() {
-        return commandeRepository.findAll();
+        return commanderepository.findAll();
     }
 
+    // Read (Get by ID)
     public Optional<commande> getCommandeById(Long id) {
-        return commandeRepository.findById(id);
+        return commanderepository.findById(id);
     }
 
-    public commande saveCommande(commande cmd) {
-        return commandeRepository.save(cmd);
+    // Update
+    public commande updateCommande(Long id, commande commandeDetails) {
+        commande commande = commanderepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("commande not found with id: " + id));
+
+        commande.setPanierId(commandeDetails.getPanierId());
+        commande.setAdress(commandeDetails.getAdress());
+        commande.setDateC(commandeDetails.getDateC());
+        commande.setStatut(commandeDetails.getStatut());
+        commande.setMethodePaiement(commandeDetails.getMethodePaiement());
+        commande.setPhone(commandeDetails.getPhone());
+
+        return commanderepository.save(commande);
     }
 
+    // Delete
     public void deleteCommande(Long id) {
-        commandeRepository.deleteById(id);
+        commande commande = commanderepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("commande not found with id: " + id));
+        commanderepository.delete(commande);
     }
 }
