@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.example.livraison.feign.CommandeClient;
 
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +52,7 @@ public class LivraisonServiceImpl implements ILivraisonService {
 
         return livraisonRepository.save(livraison);
     }
+
     @Autowired
     public LivraisonServiceImpl(LivraisonRepository livraisonRepository) {
         this.livraisonRepository = livraisonRepository;
@@ -122,6 +124,10 @@ public class LivraisonServiceImpl implements ILivraisonService {
 
         document.close();
         return out.toByteArray();
+    }
+    @Override
+    public List<Livraison> findLivraisonByDate(LocalDateTime dateLivraison) {
+        return livraisonRepository.findByDateLivraison(dateLivraison);
     }
 
 }

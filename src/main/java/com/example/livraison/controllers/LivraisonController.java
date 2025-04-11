@@ -13,6 +13,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -23,6 +24,19 @@ public class LivraisonController {
 
     @Autowired
     private EmailService emailService;
+    @GetMapping("/search-by-date")
+    public ResponseEntity<List<Livraison>> searchLivraisonByDate(@RequestParam("dateLivraison") String dateLivraison) {
+        try {
+            // Convertir la chaîne en LocalDateTime
+            LocalDateTime date = LocalDateTime.parse(dateLivraison);
+            List<Livraison> livraisons = livraisonService.findLivraisonByDate(date);
+            return ResponseEntity.ok(livraisons);
+        } catch (Exception e) {
+            // Retourne 400 en cas d'erreur de conversion
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
 
     @PostMapping("/from-commande/{commandeId}")
     public Livraison creerDepuisCommande(@PathVariable Long commandeId) {
@@ -93,4 +107,8 @@ public class LivraisonController {
         livraisonService.deleteLivraison(id);
         return ResponseEntity.noContent().build();
     }
+
+
+
+
 }
