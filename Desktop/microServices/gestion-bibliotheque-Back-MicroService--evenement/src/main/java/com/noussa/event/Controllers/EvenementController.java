@@ -1,13 +1,17 @@
 package com.noussa.event.Controllers;
 
+import com.itextpdf.text.DocumentException;
 import com.noussa.event.Entities.Evenement;
 import com.noussa.event.Entities.NotificationRequest;
 
 import com.noussa.event.Services.EmailService;
 import com.noussa.event.Services.EvenementService;
 
+import com.noussa.event.Services.ICalService;
+import com.noussa.event.Services.PdfService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +23,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/evenement") // Convention REST : pluriel et préfixe /api
@@ -29,10 +34,18 @@ public class EvenementController {
 
     private final EmailService emailService;
 
+    private final ICalService icalService;
+
+    private final PdfService pdfService;
+
     @Autowired
-    public EvenementController(EvenementService evenementService, EmailService emailService) {
+    public EvenementController(EvenementService evenementService, EmailService emailService, ICalService icalService, PdfService pdfService ) {
         this.evenementService = evenementService;
         this.emailService = emailService;
+        this.icalService =icalService;
+        this.pdfService =pdfService;
+
+
     }
     // 🔹 Créer un événement
     @PostMapping
@@ -188,4 +201,57 @@ public class EvenementController {
 
 
 
+
+    @GetMapping(value = "/{id}/export-ical", produces = "text/calendar")
+    public ResponseEntity<String> exportEventToICal(@PathVariable Long id) {
+        return evenementService.getEventById(id)
+                .map(evenement -> {
+                    String icalContent = icalService.generateICalContent(evenement);
+
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=event_" + id + ".ics");
+                    headers.add(HttpHeaders.CONTENT_TYPE,
+                            "text/calendar; charset=UTF-8");
+
+                    return ResponseEntity.ok()
+                            .headers(headers)
+                            .body(icalContent);
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
+
+
+
+
+
+    @GetMapping(value = "/{id}/certificate", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> generateCertificate(
+            @PathVariable Long id,
+            @RequestParam(required = false, defaultValue = "Participant") String participantName) {
+
+        Optional<Evenement> eventOptional = evenementService.getEventById(id);
+
+        if (eventOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Evenement evenement = eventOptional.get();
+
+        try {
+            byte[] pdfBytes = pdfService.generateCertificate(evenement, participantName);
+
+           
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=certificat_" + id + "_" + participantName + ".pdf")
+                    .body(pdfBytes);
+
+        } catch (DocumentException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

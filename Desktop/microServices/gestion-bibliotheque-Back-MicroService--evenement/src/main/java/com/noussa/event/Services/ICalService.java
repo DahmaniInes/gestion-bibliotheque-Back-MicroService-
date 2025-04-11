@@ -1,25 +1,5 @@
 package com.noussa.event.Services;
 
-
-import com.noussa.event.Entities.Evenement;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.CalScale;
-import net.fortuna.ical4j.model.property.Description;
-import net.fortuna.ical4j.model.property.Location;
-import net.fortuna.ical4j.model.property.ProdId;
-import net.fortuna.ical4j.model.property.Uid;
-import net.fortuna.ical4j.model.property.Url;
-import net.fortuna.ical4j.model.property.Version;
-import net.fortuna.ical4j.util.UidGenerator;
-import org.springframework.stereotype.Service;
-
-import java.net.URI;
-import java.time.ZoneId;
-import java.util.Date;
-
-package com.noussa.event.Services;
-
 import com.noussa.event.Entities.Evenement;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.DateTime;
