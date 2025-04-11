@@ -1,5 +1,6 @@
 package tn.esprit.ecommerce.controllers;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,21 +18,21 @@ public class lignepaniercontroller {
     @Autowired
     private lignepanierservice lignepanierservice;
 
-    // Create a new lignepanier
+    // Créer une nouvelle ligne de panier
     @PostMapping
-    public ResponseEntity<lignepanier> createLignePanier(@RequestBody lignepanier lignepanier) {
+    public ResponseEntity<lignepanier> createLignePanier(@Valid @RequestBody lignepanier lignepanier) {
         lignepanier createdLignePanier = lignepanierservice.createLignePanier(lignepanier);
         return new ResponseEntity<>(createdLignePanier, HttpStatus.CREATED);
     }
 
-    // Get all lignepaniers
+    // Récupérer toutes les lignes de panier
     @GetMapping
     public ResponseEntity<List<lignepanier>> getAllLignePaniers() {
         List<lignepanier> lignepaniers = lignepanierservice.getAllLignePaniers();
         return new ResponseEntity<>(lignepaniers, HttpStatus.OK);
     }
 
-    // Get lignepanier by ID
+    // Récupérer une ligne de panier par ID
     @GetMapping("/{id}")
     public ResponseEntity<lignepanier> getLignePanierById(@PathVariable Long id) {
         Optional<lignepanier> lignepanier = lignepanierservice.getLignePanierById(id);
@@ -39,9 +40,9 @@ public class lignepaniercontroller {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Update lignepanier
+    // Mettre à jour une ligne de panier
     @PutMapping("/{id}")
-    public ResponseEntity<lignepanier> updateLignePanier(@PathVariable Long id, @RequestBody lignepanier lignepanierDetails) {
+    public ResponseEntity<lignepanier> updateLignePanier(@PathVariable Long id, @Valid @RequestBody lignepanier lignepanierDetails) {
         try {
             lignepanier updatedLignePanier = lignepanierservice.updateLignePanier(id, lignepanierDetails);
             return new ResponseEntity<>(updatedLignePanier, HttpStatus.OK);
@@ -50,7 +51,7 @@ public class lignepaniercontroller {
         }
     }
 
-    // Delete lignepanier
+    // Supprimer une ligne de panier
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLignePanier(@PathVariable Long id) {
         try {

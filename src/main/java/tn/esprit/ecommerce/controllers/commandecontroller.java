@@ -1,5 +1,6 @@
 package tn.esprit.ecommerce.controllers;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,23 +18,21 @@ public class commandecontroller {
     @Autowired
     private commandeservice commandeservice;
 
-    // Create a new commande
-    // Create a new commande
-    // Create a new commande
+    // Créer une nouvelle commande
     @PostMapping
-    public ResponseEntity<commande> createCommande(@RequestBody commande commande) {
+    public ResponseEntity<commande> createCommande(@Valid @RequestBody commande commande) {
         commande createdCommande = commandeservice.createCommande(commande);
         return new ResponseEntity<>(createdCommande, HttpStatus.CREATED);
     }
 
-    // Get all commandes
+    // Récupérer toutes les commandes
     @GetMapping
     public ResponseEntity<List<commande>> getAllCommandes() {
         List<commande> commandes = commandeservice.getAllCommandes();
         return new ResponseEntity<>(commandes, HttpStatus.OK);
     }
 
-    // Get commande by ID
+    // Récupérer une commande par ID
     @GetMapping("/{id}")
     public ResponseEntity<commande> getCommandeById(@PathVariable Long id) {
         Optional<commande> commande = commandeservice.getCommandeById(id);
@@ -41,9 +40,9 @@ public class commandecontroller {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Update commande
+    // Mettre à jour une commande
     @PutMapping("/{id}")
-    public ResponseEntity<commande> updateCommande(@PathVariable Long id, @RequestBody commande commandeDetails) {
+    public ResponseEntity<commande> updateCommande(@PathVariable Long id, @Valid @RequestBody commande commandeDetails) {
         try {
             commande updatedCommande = commandeservice.updateCommande(id, commandeDetails);
             return new ResponseEntity<>(updatedCommande, HttpStatus.OK);
@@ -52,7 +51,7 @@ public class commandecontroller {
         }
     }
 
-    // Delete commande
+    // Supprimer une commande
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCommande(@PathVariable Long id) {
         try {

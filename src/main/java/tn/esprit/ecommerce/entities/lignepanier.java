@@ -1,38 +1,32 @@
 package tn.esprit.ecommerce.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.Data;
 
 import java.io.Serializable;
 
-@AllArgsConstructor
 @Entity
+@Data
 public class lignepanier implements Serializable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @Column(name = "panier_id")
     private Long panierId;
 
+    @NotNull
     @Column(name = "produit_id")
     private Long produitId;
 
+    @Positive
     private Integer quantite;
 
-    // Default constructor
-    public lignepanier() {
-    }
+    public lignepanier() {}
 
-    // Parameterized constructor
-    public lignepanier(Integer quantite, Long produitId, Long panierId) {
-        this.quantite = quantite;
-        this.produitId = produitId;
-        this.panierId = panierId;
-    }
-
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -41,27 +35,33 @@ public class lignepanier implements Serializable {
         this.id = id;
     }
 
-    public Long getPanierId() {
-        return panierId;
-    }
-
-    public void setPanierId(Long panierId) {
-        this.panierId = panierId;
-    }
-
-    public Long getProduitId() {
-        return produitId;
-    }
-
-    public void setProduitId(Long produitId) {
-        this.produitId = produitId;
-    }
-
-    public Integer getQuantite() {
+    public @Positive Integer getQuantite() {
         return quantite;
     }
 
-    public void setQuantite(Integer quantite) {
+    public void setQuantite(@Positive Integer quantite) {
+        this.quantite = quantite;
+    }
+
+    public @NotNull Long getProduitId() {
+        return produitId;
+    }
+
+    public void setProduitId(@NotNull Long produitId) {
+        this.produitId = produitId;
+    }
+
+    public @NotNull Long getPanierId() {
+        return panierId;
+    }
+
+    public void setPanierId(@NotNull Long panierId) {
+        this.panierId = panierId;
+    }
+
+    public lignepanier(Long panierId, Long produitId, Integer quantite) {
+        this.panierId = panierId;
+        this.produitId = produitId;
         this.quantite = quantite;
     }
 }

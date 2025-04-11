@@ -1,5 +1,6 @@
 package tn.esprit.ecommerce.controllers;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,50 +12,50 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/paniers")
+@RequestMapping("/api/paniers")
 public class paniercontroller {
 
     @Autowired
-    private panierservice panierService;
+    private panierservice panierservice;
 
-    // Create a new panier
+    // Créer un nouveau panier
     @PostMapping
-    public ResponseEntity<panier> createPanier(@RequestBody panier panier) {
-        panier createdPanier = panierService.savePanier(panier);
+    public ResponseEntity<panier> createPanier(@Valid @RequestBody panier panier) {
+        panier createdPanier = panierservice.createPanier(panier);
         return new ResponseEntity<>(createdPanier, HttpStatus.CREATED);
     }
 
-    // Get all paniers
+    // Récupérer tous les paniers
     @GetMapping
     public ResponseEntity<List<panier>> getAllPaniers() {
-        List<panier> paniers = panierService.getAllPaniers();
+        List<panier> paniers = panierservice.getAllPaniers();
         return new ResponseEntity<>(paniers, HttpStatus.OK);
     }
 
-    // Get panier by ID
+    // Récupérer un panier par ID
     @GetMapping("/{id}")
     public ResponseEntity<panier> getPanierById(@PathVariable Long id) {
-        Optional<panier> panier = panierService.getPanierById(id);
+        Optional<panier> panier = panierservice.getPanierById(id);
         return panier.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Update panier
+    // Mettre à jour un panier
     @PutMapping("/{id}")
-    public ResponseEntity<panier> updatePanier(@PathVariable Long id, @RequestBody panier panierDetails) {
+    public ResponseEntity<panier> updatePanier(@PathVariable Long id, @Valid @RequestBody panier panierDetails) {
         try {
-            panier updatedPanier = panierService.updatePanier(id, panierDetails);
+            panier updatedPanier = panierservice.updatePanier(id, panierDetails);
             return new ResponseEntity<>(updatedPanier, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    // Delete panier
+    // Supprimer un panier
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePanier(@PathVariable Long id) {
         try {
-            panierService.deletePanier(id);
+            panierservice.deletePanier(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
