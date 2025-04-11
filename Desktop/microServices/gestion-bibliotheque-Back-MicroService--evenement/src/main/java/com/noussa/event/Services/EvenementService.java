@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-@AllArgsConstructor
 @Service
 public class EvenementService {
     @Autowired
@@ -43,6 +42,10 @@ public class EvenementService {
             existingEvent.setLocation(updatedEvent.getLocation());
             existingEvent.setMaxParticipants(updatedEvent.getMaxParticipants());
             existingEvent.setStatus(updatedEvent.getStatus());
+            existingEvent.setResourceLink(updatedEvent.getResourceLink()); // Mise à jour du lien
+            existingEvent.setResourceFile(updatedEvent.getResourceFile()); // Mise à jour du fichier
+            //existingEvent.getResourceFileName(updatedEvent.getResourceFileName()); // Mise à jour du fichier
+
             return evenementRepository.save(existingEvent);
         } else {
             return null;
