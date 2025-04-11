@@ -3,6 +3,7 @@ package tn.esprit.bibliogestioncatalogues.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tn.esprit.bibliogestioncatalogues.entities.Categorie;
+import tn.esprit.bibliogestioncatalogues.entities.Livre;
 import tn.esprit.bibliogestioncatalogues.repo.CategorieRepository;
 
 import java.util.List;
@@ -35,5 +36,11 @@ public class CategorieService implements ICategorieService{
 
     public void deleteCategorie(Long id) {
         categorieRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Livre> getLivresByCategorie(Long categorieId) {
+        Optional<Categorie> categorie = categorieRepository.findById(categorieId);
+        return categorie.map(Categorie::getLivres).orElseThrow(() -> new RuntimeException("Catégorie non trouvée"));
     }
 }

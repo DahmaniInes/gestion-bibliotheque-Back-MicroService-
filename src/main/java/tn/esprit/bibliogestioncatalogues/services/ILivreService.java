@@ -1,6 +1,7 @@
 package tn.esprit.bibliogestioncatalogues.services;
 
 import org.springframework.web.multipart.MultipartFile;
+import tn.esprit.bibliogestioncatalogues.entities.Commentaire;
 import tn.esprit.bibliogestioncatalogues.entities.Livre;
 
 import java.io.ByteArrayInputStream;
@@ -18,4 +19,7 @@ public interface ILivreService {
     ByteArrayInputStream exportLivresToExcel(List<Livre> livres) throws IOException;
     ByteArrayInputStream exportLivresToPdf(List<Livre> livres);
     void importLivresFromExcel(MultipartFile file) throws IOException;
+    Commentaire addCommentaire(Long livreId, Long utilisateurId, Commentaire commentaire);
+    List<Commentaire> getCommentairesByLivre(Long livreId);
+    List<Livre> searchLivres(String titre, String auteur, Long categorieId, Integer anneeMin, Integer anneeMax, Boolean disponible);
 }

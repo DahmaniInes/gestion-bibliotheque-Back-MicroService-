@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.bibliogestioncatalogues.entities.Categorie;
+import tn.esprit.bibliogestioncatalogues.entities.Livre;
 import tn.esprit.bibliogestioncatalogues.services.ICategorieService;
 
 import java.util.List;
@@ -25,6 +26,12 @@ public class CategorieController {
     public ResponseEntity<List<Categorie>> getAllCategories() {
         List<Categorie> categories = categorieService.getAllCategories();
         return new ResponseEntity<>(categories, HttpStatus.OK);
+    }
+    @Operation(summary = "Lister les livres d'une catégorie")
+    @GetMapping("/{id}/livres")
+    public ResponseEntity<List<Livre>> getLivresByCategorie(@PathVariable Long id) {
+        List<Livre> livres = categorieService.getLivresByCategorie(id);
+        return ResponseEntity.ok(livres);
     }
 
     @Operation(summary = "Get a category by ID")

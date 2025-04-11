@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import tn.esprit.bibliogestioncatalogues.entities.Commentaire;
 import tn.esprit.bibliogestioncatalogues.entities.Livre;
 import tn.esprit.bibliogestioncatalogues.services.ILivreService;
 
@@ -101,5 +102,33 @@ public class LivreController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erreur pendant l'importation : " + e.getMessage());
         }
+    }
+    @Operation(summary = "Rechercher des livres avec filtres")
+    @GetMapping("/search")
+    public ResponseEntity<List<Livre>> searchLivres(
+            @RequestParam(required = false) String titre,
+            @RequestParam(required = false) String auteur,
+            @RequestParam(required = false) Long categorieId,
+            @RequestParam(required = false) Integer anneeMin,
+            @RequestParam(required = false) Integer anneeMax,
+            @RequestParam(required = false) Boolean disponible) {
+        List<Livre> livres = livreService.searchLivres(titre, auteur, categorieId, anneeMin, anneeMax, disponible);
+        return ResponseEntity.ok(livres);
+    }
+    @Operation(summary = "Ajouter un commentaire à un livre")
+    @PostMapping("/{id}/commentaires")
+    public ResponseEntity<Commentaire> addCommentaire(
+            @PathVariable Long id,
+            @RequestBody Commentaire commentaire,
+            @RequestParam Long utilisateurId) {
+        Commentaire savedCommentaire = livreService.addCommentaire(id, utilisateurId, commentaire);
+        return new ResponseEntity<>(savedCommentaire, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Lister les commentaires d'un livre")
+    @GetMapping("/{id}/commentaires")
+    public ResponseEntity<List<Commentaire>> getCommentairesByLivre(@PathVariable Long id) {
+        List<Commentaire> commentaires = livreService.getCommentairesByLivre(id);
+        return ResponseEntity.ok(commentaires);
     }
 }

@@ -10,20 +10,31 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import tn.esprit.bibliogestioncatalogues.entities.Commentaire;
 import tn.esprit.bibliogestioncatalogues.entities.Livre;
+import tn.esprit.bibliogestioncatalogues.repo.CommentaireRepository;
 import tn.esprit.bibliogestioncatalogues.repo.LivreRepository;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Join;
 
+import java.util.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class LivreService implements ILivreService {
 
     @Autowired
     private LivreRepository livreRepository;
+    @Autowired
+    private CommentaireRepository commentaireRepository;
 
     @Override
     public List<Livre> getAllLivres() {
@@ -131,5 +142,53 @@ public class LivreService implements ILivreService {
                 livreRepository.save(livre);
             }
         }
+    }
+
+
+
+    @Override
+    public List<Livre> searchLivres(String titre, String auteur, Long categorieId, Integer anneeMin, Integer anneeMax, Boolean disponible) {
+        return livreRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (titre != null && !titre.isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("titre")), "%" + titre.toLowerCase() + "%"));
+            }
+            if (auteur != null && !auteur.isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.join("auteurs").get("nomComplet")), "%" + auteur.toLowerCase() + "%"));
+            }
+            if (categorieId != null) {
+                predicates.add(cb.equal(root.get("categorie").get("id"), categorieId));
+            }
+            if (anneeMin != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("anneePublication"), anneeMin));
+            }
+            if (anneeMax != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("anneePublication"), anneeMax));
+            }
+            if (disponible != null && disponible) {
+                predicates.add(cb.greaterThan(root.get("stockDisponible"), 0));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        });
+    }
+
+
+
+    @Override
+    public Commentaire addCommentaire(Long livreId, Long utilisateurId, Commentaire commentaire) {
+        Livre livre = livreRepository.findById(livreId)
+                .orElseThrow(() -> new RuntimeException("Livre non trouvé"));
+
+
+        commentaire.setLivre(livre);
+        commentaire.setDateCreation(new Date());
+        return commentaireRepository.save(commentaire);
+    }
+
+    @Override
+    public List<Commentaire> getCommentairesByLivre(Long livreId) {
+        return commentaireRepository.findByLivreId(livreId);
     }
 }
