@@ -11,6 +11,7 @@ import tn.esprit.ecommerce.services.lignepanierservice;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/lignepanier")
 public class lignepaniercontroller {

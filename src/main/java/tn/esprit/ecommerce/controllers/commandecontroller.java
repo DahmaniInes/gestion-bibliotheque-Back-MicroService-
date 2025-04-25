@@ -11,6 +11,7 @@ import tn.esprit.ecommerce.services.commandeservice;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/commandes")
 public class commandecontroller {
