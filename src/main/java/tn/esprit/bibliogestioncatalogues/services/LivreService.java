@@ -1,40 +1,40 @@
 package tn.esprit.bibliogestioncatalogues.services;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.pdf.PdfWriter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.bibliogestioncatalogues.entities.Commentaire;
 import tn.esprit.bibliogestioncatalogues.entities.Livre;
+import tn.esprit.bibliogestioncatalogues.entities.Utilisateur;
 import tn.esprit.bibliogestioncatalogues.repo.CommentaireRepository;
 import tn.esprit.bibliogestioncatalogues.repo.LivreRepository;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Join;
+import tn.esprit.bibliogestioncatalogues.repositories.UtilisateurRepository;
 
-import java.util.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-
+import java.util.Optional;
 
 @Service
 public class LivreService implements ILivreService {
 
     @Autowired
     private LivreRepository livreRepository;
+
     @Autowired
     private CommentaireRepository commentaireRepository;
+
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
 
     @Override
     public List<Livre> getAllLivres() {
@@ -48,7 +48,19 @@ public class LivreService implements ILivreService {
 
     @Override
     public Livre saveLivre(Livre livre) {
-        return livreRepository.save(livre);
+        try {
+            System.out.println("Données du livre reçu : " + livre);
+            if (livre.getId() != null) {
+                System.out.println("Attention : ID fourni (" + livre.getId() + "), il sera ignoré pour la création.");
+                livre.setId(null); // Forcer la création d'une nouvelle entité
+            }
+            Livre savedLivre = livreRepository.save(livre);
+            System.out.println("Livre enregistré avec succès : " + savedLivre);
+            return savedLivre;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erreur lors de l'enregistrement du livre : " + e.getMessage());
+        }
     }
 
     @Override
@@ -96,6 +108,10 @@ public class LivreService implements ILivreService {
                 row.createCell(6).setCellValue(livre.getStockDisponible());
             }
 
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
@@ -104,24 +120,52 @@ public class LivreService implements ILivreService {
 
     @Override
     public ByteArrayInputStream exportLivresToPdf(List<Livre> livres) {
-        Document document = new Document();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            // Initialize PDF writer and document
+            PdfWriter writer = new PdfWriter(out);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
 
-        try {
-            PdfWriter.getInstance(document, out);
-            document.open();
-            document.add(new Paragraph("Liste des Livres :"));
+            // Add a title to the PDF
+            document.add(new Paragraph("Liste des Livres")
+                    .setBold()
+                    .setFontSize(16));
 
+            // Define column widths for the table
+            float[] columnWidths = {1, 3, 2, 1, 2, 1, 1};
+            Table table = new Table(columnWidths);
+
+            // Add table headers
+            table.addHeaderCell("ID");
+            table.addHeaderCell("Titre");
+            table.addHeaderCell("ISBN");
+            table.addHeaderCell("Année");
+            table.addHeaderCell("Éditeur");
+            table.addHeaderCell("Prix");
+            table.addHeaderCell("Stock");
+
+            // Add book data to the table
             for (Livre livre : livres) {
-                document.add(new Paragraph("Titre: " + livre.getTitre() + ", ISBN: " + livre.getIsbn()));
+                table.addCell(String.valueOf(livre.getId()));
+                table.addCell(livre.getTitre() != null ? livre.getTitre() : "");
+                table.addCell(livre.getIsbn() != null ? livre.getIsbn() : "");
+                table.addCell(String.valueOf(livre.getAnneePublication()));
+                table.addCell(livre.getEditeur() != null ? livre.getEditeur() : "");
+                table.addCell(String.valueOf(livre.getPrix()));
+                table.addCell(String.valueOf(livre.getStockDisponible()));
             }
 
-            document.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            // Add the table to the document
+            document.add(table);
 
-        return new ByteArrayInputStream(out.toByteArray());
+            // Close the document
+            document.close();
+
+            // Return the PDF as a ByteArrayInputStream
+            return new ByteArrayInputStream(out.toByteArray());
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de l'exportation PDF : " + e.getMessage());
+        }
     }
 
     @Override
@@ -129,60 +173,84 @@ public class LivreService implements ILivreService {
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue;
+                if (row.getRowNum() == 0) continue; // Skip header row
 
                 Livre livre = new Livre();
-                livre.setTitre(row.getCell(0).getStringCellValue());
-                livre.setIsbn(row.getCell(1).getStringCellValue());
-                livre.setAnneePublication((int) row.getCell(2).getNumericCellValue());
-                livre.setEditeur(row.getCell(3).getStringCellValue());
-                livre.setPrix(row.getCell(4).getNumericCellValue());
-                livre.setStockDisponible((int) row.getCell(5).getNumericCellValue());
+
+                Cell titreCell = row.getCell(1);
+                if (titreCell != null) {
+                    livre.setTitre(getCellValueAsString(titreCell));
+                }
+
+                Cell isbnCell = row.getCell(2);
+                if (isbnCell != null) {
+                    livre.setIsbn(getCellValueAsString(isbnCell));
+                }
+
+                Cell anneeCell = row.getCell(3);
+                if (anneeCell != null) {
+                    livre.setAnneePublication((int) getCellValueAsNumeric(anneeCell));
+                }
+
+                Cell editeurCell = row.getCell(4);
+                if (editeurCell != null) {
+                    livre.setEditeur(getCellValueAsString(editeurCell));
+                }
+
+                Cell prixCell = row.getCell(5);
+                if (prixCell != null) {
+                    livre.setPrix(getCellValueAsNumeric(prixCell));
+                }
+
+                Cell stockCell = row.getCell(6);
+                if (stockCell != null) {
+                    livre.setStockDisponible((int) getCellValueAsNumeric(stockCell));
+                }
 
                 livreRepository.save(livre);
             }
         }
     }
 
-
-
     @Override
     public List<Livre> searchLivres(String titre, String auteur, Long categorieId, Integer anneeMin, Integer anneeMax, Boolean disponible) {
-        return livreRepository.findAll((root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            if (titre != null && !titre.isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.get("titre")), "%" + titre.toLowerCase() + "%"));
-            }
-            if (auteur != null && !auteur.isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.join("auteurs").get("nomComplet")), "%" + auteur.toLowerCase() + "%"));
-            }
-            if (categorieId != null) {
-                predicates.add(cb.equal(root.get("categorie").get("id"), categorieId));
-            }
-            if (anneeMin != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("anneePublication"), anneeMin));
-            }
-            if (anneeMax != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("anneePublication"), anneeMax));
-            }
-            if (disponible != null && disponible) {
-                predicates.add(cb.greaterThan(root.get("stockDisponible"), 0));
-            }
-
-            return cb.and(predicates.toArray(new Predicate[0]));
-        });
+        return null;
     }
 
+    private String getCellValueAsString(Cell cell) {
+        if (cell == null) return null;
+        switch (cell.getCellType()) {
+            case STRING: return cell.getStringCellValue();
+            case NUMERIC: return String.valueOf((long) cell.getNumericCellValue());
+            case BOOLEAN: return String.valueOf(cell.getBooleanCellValue());
+            case FORMULA: return cell.getCellFormula();
+            default: return "";
+        }
+    }
 
+    private double getCellValueAsNumeric(Cell cell) {
+        if (cell == null) return 0.0;
+        switch (cell.getCellType()) {
+            case NUMERIC: return cell.getNumericCellValue();
+            case STRING:
+                try {
+                    return Double.parseDouble(cell.getStringCellValue());
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("La cellule doit contenir une valeur numérique : " + cell.getStringCellValue());
+                }
+            default: throw new IllegalArgumentException("Type de cellule non supporté pour une valeur numérique : " + cell.getCellType());
+        }
+    }
 
     @Override
     public Commentaire addCommentaire(Long livreId, Long utilisateurId, Commentaire commentaire) {
         Livre livre = livreRepository.findById(livreId)
-                .orElseThrow(() -> new RuntimeException("Livre non trouvé"));
-
+                .orElseThrow(() -> new RuntimeException("Livre non trouvé avec l'ID : " + livreId));
+        Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID : " + utilisateurId));
 
         commentaire.setLivre(livre);
+        commentaire.setUtilisateur(utilisateur);
         commentaire.setDateCreation(new Date());
         return commentaireRepository.save(commentaire);
     }

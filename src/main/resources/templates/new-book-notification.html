@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Nouveau livre ajouté</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { width: 80%; margin: 0 auto; }
+        .header { background-color: #f4f4f4; padding: 10px; text-align: center; }
+        .content { padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h2>Nouveau livre ajouté</h2>
+    </div>
+    <div class="content">
+        <p>Un nouveau livre a été ajouté dans le catalogue.</p>
+        <h3>Détails du livre :</h3>
+        <table>
+            <tr>
+                <th>Titre</th>
+                <td th:text="${livre.titre}"></td>
+            </tr>
+            <tr>
+                <th>Auteur(s)</th>
+                <td th:text="${auteurs}"></td>
+            </tr>
+            <tr>
+                <th>ISBN</th>
+                <td th:text="${livre.isbn}"></td>
+            </tr>
+            <tr>
+                <th>Éditeur</th>
+                <td th:text="${livre.editeur}"></td>
+            </tr>
+            <tr>
+                <th>Année de publication</th>
+                <td th:text="${livre.anneePublication}"></td>
+            </tr>
+            <tr>
+                <th>Prix</th>
+                <td th:text="${livre.prix + ' TND'}"></td>
+            </tr>
+            <tr>
+                <th>Stock disponible</th>
+                <td th:text="${livre.stockDisponible}"></td>
+            </tr>
+        </table>
+        <p style="margin-top: 20px;">Cordialement,<br>L'équipe Biblio-GestionCatalogues</p>
+    </div>
+</div>
+</body>
+</html>

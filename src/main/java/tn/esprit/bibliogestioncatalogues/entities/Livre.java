@@ -24,6 +24,7 @@ public class Livre {
     private String resume;
     private double prix;
     private int stockDisponible;
+    @Column(length = 512)
     private String imageCouverture;
 
     @ManyToOne

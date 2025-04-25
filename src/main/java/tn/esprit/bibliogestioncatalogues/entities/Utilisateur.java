@@ -1,41 +1,32 @@
 package tn.esprit.bibliogestioncatalogues.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Commentaire {
+public class Utilisateur {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private int note; // Note de 1 à 5
+    private String nom;
 
-    @Column(length = 1000)
-    private String commentaire;
+    @Column(nullable = false, unique = true)
+    private String email;
 
-    private Date dateCreation;
-
-    @ManyToOne
-    @JoinColumn(name = "livre_id")
+    @OneToMany(mappedBy = "utilisateur")
     @JsonBackReference
-    private Livre livre;
-
-    @ManyToOne
-    @JoinColumn(name = "utilisateur_id")
-    @JsonManagedReference
-    private Utilisateur utilisateur;
+    private List<Commentaire> commentaires;
 }
