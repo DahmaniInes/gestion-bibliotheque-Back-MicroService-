@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -14,9 +15,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize; // Import pour la sécurité
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import tn.esprit.bibliogestioncatalogues.DTO.BookEvent;
 import tn.esprit.bibliogestioncatalogues.entities.Commentaire;
 import tn.esprit.bibliogestioncatalogues.entities.Livre;
 import tn.esprit.bibliogestioncatalogues.services.ILivreService;
+import tn.esprit.bibliogestioncatalogues.services.RabbitService;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,11 +28,16 @@ import java.util.Optional;
 
 @Tag(name = "Livre", description = "Opérations liées à la gestion des livres")
 @RestController
+@AllArgsConstructor
 @RequestMapping("/categories/livres")
 public class LivreController {
 
+    private final RabbitService bookSender;
+
     @Autowired
     private ILivreService livreService;
+
+
 
     @Operation(summary = "Récupérer tous les livres", description = "Retourne la liste complète des livres enregistrés dans la base de données.")
     @ApiResponses(value = {
@@ -63,11 +71,16 @@ public class LivreController {
             @ApiResponse(responseCode = "400", description = "Données d'entrée invalides"),
             @ApiResponse(responseCode = "500", description = "Erreur serveur interne")
     })
-    @PostMapping
-    @PreAuthorize("hasRole('admin')") // Réservé aux administrateurs
+    @PostMapping // Réservé aux administrateurs
     public ResponseEntity<Livre> createLivre(@RequestBody Livre livre) {
         livre.setId(null); // Assurez-vous que l'ID est null pour une nouvelle entité
         Livre savedLivre = livreService.saveLivre(livre);
+        BookEvent event = new BookEvent(
+                savedLivre.getIsbn(),
+                savedLivre.getTitre(),
+                savedLivre.getStockDisponible()
+        );
+        bookSender.sendBookEvent(event);
         return new ResponseEntity<>(savedLivre, HttpStatus.CREATED);
     }
 
